@@ -2,10 +2,12 @@ import logging
 import re
 import sys
 
+
 class CodeError(Exception):
     def __init__(self, message=None):
         self.message = message
         super().__init__(self.message)
+
 
 def end_on_error(error_description, line=None, line_pos=None):
     """Ends program on error"""
@@ -17,6 +19,7 @@ def end_on_error(error_description, line=None, line_pos=None):
         print(f"Error: {error_description}")
 
     sys.exit(1)
+
 
 def load_from_file():
     try:                    # Get name of .ppp file from command line argument
@@ -36,6 +39,7 @@ def load_from_file():
     else:
         return lines
 
+
 def clean_input(lines):
     cleaned_lines = []
     for line in lines:
@@ -54,20 +58,23 @@ def clean_input(lines):
 
     return cleaned_lines
 
+
 def read_from_memory(address_to_read):
     global memory
     return memory[address_to_read]
 
+
 def write_to_memory(address_to_write, value_to_write):
     global memory
     memory[address_to_write] = value_to_write
+
 
 def parse_assignment(line):
     space_index = line.index(" ")
     before_space = line[:space_index]
     after_space = line[space_index + 1:]
 
-    if not(before_space.startswith("[") and before_space.endswith("]")):
+    if not (before_space.startswith("[") and before_space.endswith("]")):
         raise CodeError(
             f"Assignment target '{before_space}' is not a memory adress",
         )
@@ -76,9 +83,10 @@ def parse_assignment(line):
 
     adress = parse_expression(before_space[1:-1])
     value_to_assign = parse_expression(after_space)
-    #logging.debug(f"{memory_adress=}, {value_to_assign=}")
+    # logging.debug(f"{memory_adress=}, {value_to_assign=}")
 
     write_to_memory(adress, value_to_assign)
+
 
 def parse_print_statement(line):
     line_copy = line
@@ -108,8 +116,9 @@ def parse_print_statement(line):
 
     print(string_to_print, end="")
 
+
 def parse_expression(expr):
-    if not(expr.startswith("(") and expr.endswith(")")):
+    if not (expr.startswith("(") and expr.endswith(")")):
         if re.match("^\[.*\]$", expr):
             address_to_read = parse_expression(expr[1:-1])
             return read_from_memory(address_to_read)
@@ -132,11 +141,13 @@ def parse_expression(expr):
 
     return value
 
+
 def int_as_plus_minus_string(x):
     x_string = bin(x)[2:]
     x_string = re.sub("0", "-", x_string)
     x_string = re.sub("1", "+", x_string)
     return x_string
+
 
 def parse_code_line(line, line_index):
     if line is None:
@@ -147,6 +158,7 @@ def parse_code_line(line, line_index):
         parse_print_statement(line)
     else:
         logging.info(f"skipped line {line} for now (not implemented)")
+
 
 def main():
     global memory
@@ -166,6 +178,7 @@ def main():
         if not val:
             break
         logging.debug(f"{i=}, {val=}")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
