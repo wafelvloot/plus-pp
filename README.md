@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/wafelvloot/plus-pp/main/plus_pp_logo.svg">
+  <img src="https://raw.githubusercontent.com/wafelvloot/plus-pp/main/logo/plus_pp_logo.svg">
   <br>
   <br>
   <i>🔥🔥  The Most More Bestest Esolang Ever 🔥🔥 </i>
@@ -17,4 +17,4 @@ Do you also hate 🤓 letters 🤓, 🥱 being able to read your code 🥱 and t
 - Not really anything else
 
 ## Full specification
-The full specification can be found [here](specification.md)
+The full specification can be found [here](docs/specification.md)
