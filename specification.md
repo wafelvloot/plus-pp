@@ -1,4 +1,4 @@
-# General syntax
+## General syntax
 Every non blank line contains a single statement, which (with the exception of conditional statements) ends with a `;`. Indentation is ignored, and using it is not recommended. Comments can on lines that don't contain code, and are indicated by starting a line with a letter character.
 
 ## Data
