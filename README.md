@@ -12,7 +12,7 @@
 Do you also hate 🤓 letters 🤓, 🥱 being able to read your code 🥱 and the "🤢 UvA style guide 🤢"? Then Plus++ is THE language for you!
 <br>
 
-## Features
+## Features (Plus++ is currently in development)
 - Almost everything is a plus or a minus
 - Not really anything else
 
