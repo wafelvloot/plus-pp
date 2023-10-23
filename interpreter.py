@@ -1,5 +1,6 @@
 import re
 import sys
+import logging
 
 def end_on_error(error_description, line=None, line_pos=None):
     """Ends program on error"""
@@ -25,11 +26,9 @@ def load_from_file():
     try:
         with open(file_name, 'r') as f:
             lines = f.readlines()
-            # enumerated_lines = enumerate(lines)
     except FileNotFoundError:       # Throw error if .ppp file doesn't exist
         end_on_error(f'''The file "{file_name}" doesn't exist''')
     else:
-        # return enumerated_lines
         return lines
 
 def clean_input(lines):
@@ -50,8 +49,65 @@ def clean_input(lines):
 
     return cleaned_lines
 
+def parse_assignment(line, line_index):
+    space_index = line.index(" ")
+    before_space = line[:space_index]
+    after_space = line[space_index + 1:]
+
+    if not(before_space.startswith("[") and before_space.endswith("]")):
+        end_on_error(
+            f"Assignment target '{before_space}' is not a memory adress",
+            line, line_index
+        )
+
+    logging.debug(f"target={before_space}, assign {after_space}")
+
+    adress = parse_expression(before_space[1:-1], line, line_index)
+    value_to_assign = parse_expression(after_space, line, line_index)
+    #logging.debug(f"{memory_adress=}, {value_to_assign=}")
+    return adress, value_to_assign
+
+def parse_expression(expr, line, line_index):
+    if not(expr.startswith("(") and expr.endswith(")")):
+        end_on_error(
+            f"Expression '{expr} is not a valid expression. Expressions need `"
+            f"to be surrounded by parentheses.",
+            line, line_index
+        )
+
+    expr_content = expr[1:-1]
+    if re.match("^[+-]*$", expr_content):
+        binary_string = expr[1:-1]
+        binary_string = re.sub("\+", "1", binary_string)
+        binary_string = re.sub("\-", "0", binary_string)
+
+        value = int(binary_string, base=2)
+    else:
+        logging.ERROR("no support yet for compound expressions")
+        sys.exit(1)
+
+    return value
+
+logging.basicConfig(level=logging.DEBUG)
 
 memory = [0] * (2**16)
 code_lines = load_from_file()
 code_lines = clean_input(code_lines)
-print(code_lines)
+logging.debug(code_lines)
+
+# TODO size checks
+for line_index, this_line in enumerate(code_lines):
+    if this_line is None:
+        continue
+    elif " " in this_line:
+        address_to_assign, value_to_assign = parse_assignment(
+            this_line, line_index
+        )
+        memory[address_to_assign] = value_to_assign
+    else:
+        logging.info(f"skipped line {this_line} for now (not assignment)")
+
+for i, val in enumerate(memory):
+    if not val:
+        break
+    logging.debug(f"{i=}, {val=}")
