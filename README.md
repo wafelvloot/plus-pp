@@ -1,10 +1,10 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/wafelvloot/plus-pp/main/plus_pp_logo.svg">
-  <br />
-  <br />
+  <br>
+  <br>
   <i>🔥🔥  The Most More Bestest Esolang Ever 🔥🔥 </i>
 </p>
-<hr />
+<hr>
 
 # Plus++
 
