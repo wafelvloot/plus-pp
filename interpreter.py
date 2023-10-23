@@ -67,6 +67,29 @@ def parse_assignment(line, line_index):
     #logging.debug(f"{memory_adress=}, {value_to_assign=}")
     return adress, value_to_assign
 
+def parse_print_statement(line, line_index):
+    line_copy = line
+    print_mode = -1
+
+    while line_copy.endswith("!"):
+        print_mode += 1
+        line_copy = line_copy[:-1]
+    if print_mode > 2:
+        end_on_error(
+            "Too many '!' characters, there are only 3 print modes",
+            line, line_index
+        )
+
+    val = parse_expression(line_copy, line, line_index)
+    if print_mode == 0:
+        string_to_print = int_as_plus_minus_string(val)
+    elif print_mode == 1:
+        string_to_print = str(val)
+    elif print_mode == 2:
+        string_to_print = chr(val % 256)
+
+    return string_to_print
+
 def parse_expression(expr, line, line_index):
     if not(expr.startswith("(") and expr.endswith(")")):
         end_on_error(
@@ -88,6 +111,13 @@ def parse_expression(expr, line, line_index):
 
     return value
 
+def int_as_plus_minus_string(x):
+    x_string = bin(x)[2:]
+    print(x_string)
+    x_string = re.sub("0", "-", x_string)
+    x_string = re.sub("1", "+", x_string)
+    return x_string
+
 logging.basicConfig(level=logging.DEBUG)
 
 memory = [0] * (2**16)
@@ -96,16 +126,19 @@ code_lines = clean_input(code_lines)
 logging.debug(code_lines)
 
 # TODO size checks
-for line_index, this_line in enumerate(code_lines):
-    if this_line is None:
+for line_index, line in enumerate(code_lines):
+    if line is None:
         continue
-    elif " " in this_line:
+    elif " " in line:
         address_to_assign, value_to_assign = parse_assignment(
-            this_line, line_index
+            line, line_index
         )
         memory[address_to_assign] = value_to_assign
+    elif line.endswith("!"):
+        string_to_print = parse_print_statement(line, line_index)
+        print(string_to_print, end="")
     else:
-        logging.info(f"skipped line {this_line} for now (not assignment)")
+        logging.info(f"skipped line {line} for now (not implemented)")
 
 for i, val in enumerate(memory):
     if not val:
