@@ -1,6 +1,11 @@
+import logging
 import re
 import sys
-import logging
+
+class CodeError(Exception):
+    def __init__(self, message=None):
+        self.message = message
+        super().__init__(self.message)
 
 def end_on_error(error_description, line=None, line_pos=None):
     """Ends program on error"""
@@ -49,26 +54,35 @@ def clean_input(lines):
 
     return cleaned_lines
 
-def parse_assignment(line, line_index):
+def read_from_memory(address_to_read):
+    global memory
+    return memory[address_to_read]
+
+def write_to_memory(address_to_write, value_to_write):
+    global memory
+    memory[address_to_write] = value_to_write
+
+def parse_assignment(line):
     space_index = line.index(" ")
     before_space = line[:space_index]
     after_space = line[space_index + 1:]
 
     if not(before_space.startswith("[") and before_space.endswith("]")):
-        end_on_error(
+        raise CodeError(
             f"Assignment target '{before_space}' is not a memory adress",
-            line, line_index
         )
 
     logging.debug(f"target={before_space}, assign {after_space}")
 
-    adress = parse_expression(before_space[1:-1], line, line_index)
-    value_to_assign = parse_expression(after_space, line, line_index)
+    adress = parse_expression(before_space[1:-1])
+    value_to_assign = parse_expression(after_space)
     #logging.debug(f"{memory_adress=}, {value_to_assign=}")
-    return adress, value_to_assign
 
-def parse_print_statement(line, line_index):
+    write_to_memory(adress, value_to_assign)
+
+def parse_print_statement(line):
     line_copy = line
+    logging.debug(f"{line_copy=}")
     print_mode = -1
 
     while line_copy.endswith("!"):
@@ -80,22 +94,29 @@ def parse_print_statement(line, line_index):
             line, line_index
         )
 
-    val = parse_expression(line_copy, line, line_index)
+    val = parse_expression(line_copy)
+
     if print_mode == 0:
         string_to_print = int_as_plus_minus_string(val)
+        logging.debug("printing with mode 0")
     elif print_mode == 1:
         string_to_print = str(val)
+        logging.debug("printing with mode 1")
     elif print_mode == 2:
         string_to_print = chr(val % 256)
+        logging.debug("printing with mode 2")
 
-    return string_to_print
+    print(string_to_print, end="")
 
-def parse_expression(expr, line, line_index):
+def parse_expression(expr):
     if not(expr.startswith("(") and expr.endswith(")")):
-        end_on_error(
+        if re.match("^\[.*\]$", expr):
+            address_to_read = parse_expression(expr[1:-1])
+            return read_from_memory(address_to_read)
+
+        raise CodeError(
             f"Expression '{expr} is not a valid expression. Expressions need `"
             f"to be surrounded by parentheses.",
-            line, line_index
         )
 
     expr_content = expr[1:-1]
@@ -106,41 +127,46 @@ def parse_expression(expr, line, line_index):
 
         value = int(binary_string, base=2)
     else:
-        logging.ERROR("no support yet for compound expressions")
+        logging.error(f"expression {expr} is not valid or not supported yet")
         sys.exit(1)
 
     return value
 
 def int_as_plus_minus_string(x):
     x_string = bin(x)[2:]
-    print(x_string)
     x_string = re.sub("0", "-", x_string)
     x_string = re.sub("1", "+", x_string)
     return x_string
 
-logging.basicConfig(level=logging.DEBUG)
-
-memory = [0] * (2**16)
-code_lines = load_from_file()
-code_lines = clean_input(code_lines)
-logging.debug(code_lines)
-
-# TODO size checks
-for line_index, line in enumerate(code_lines):
+def parse_code_line(line, line_index):
     if line is None:
-        continue
+        return
     elif " " in line:
-        address_to_assign, value_to_assign = parse_assignment(
-            line, line_index
-        )
-        memory[address_to_assign] = value_to_assign
+        parse_assignment(line)
     elif line.endswith("!"):
-        string_to_print = parse_print_statement(line, line_index)
-        print(string_to_print, end="")
+        parse_print_statement(line)
     else:
         logging.info(f"skipped line {line} for now (not implemented)")
 
-for i, val in enumerate(memory):
-    if not val:
-        break
-    logging.debug(f"{i=}, {val=}")
+def main():
+    global memory
+    memory = [0] * (2**16)
+
+    code_lines = load_from_file()
+    code_lines = clean_input(code_lines)
+    logging.debug(code_lines)
+
+    for line_index, line in enumerate(code_lines):
+        try:
+            parse_code_line(line, line_index)
+        except CodeError as error:
+            end_on_error(error.message, line, line_index)
+
+    for i, val in enumerate(memory):
+        if not val:
+            break
+        logging.debug(f"{i=}, {val=}")
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    main()
