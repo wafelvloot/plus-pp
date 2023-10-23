@@ -1,5 +1,5 @@
 ## General syntax
-Every non blank line that is not a label contains a single statement, which ends with a `;`. Indentation is ignored, and using it is not recommended. Comments can only appear on lines that don't contain code, and are indicated by starting a line with a letter character.
+Every non blank line that is not a label contains a single statement. Indentation is ignored, and using it is not recommended. Comments can only appear on lines that don't contain code, and are indicated by starting a line with a letter character.
 
 ## Data
 Plus++ only has built in support for integers. Booleans are handled as normal integer 0's and 1's. All numbers are 16 bit unsigned integers.
