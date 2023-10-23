@@ -23,7 +23,7 @@ Other statements that can change the value of a variable are (in this case for t
 - `++x;` and `--x;` throw special errors, because they are stupid
 
 ### Lists
-Lists can be declared with the following statement, in this case for the list with name +--+:
+Lists can be declared with the following statement, in this case for the list with name `+--+`:
 ```
 + +--+[];
 ```
