@@ -50,7 +50,7 @@ def clean_input(lines):
 
         # all symbols that plus++ uses, if none of these are used as a first
         # character, the line is assumed to be a comment
-        line_is_code = re.match("[+{}()[\]\-]", line[0])
+        line_is_code = re.match(r"[+{}()[\]\-]", line[0])
         if line_is_code is None:
             clean_line = None
 
@@ -119,7 +119,7 @@ def parse_print_statement(line):
 
 def parse_expression(expr):
     if not (expr.startswith("(") and expr.endswith(")")):
-        if re.match("^\[.*\]$", expr):
+        if re.match(r"^\[.*\]$", expr):
             address_to_read = parse_expression(expr[1:-1])
             return read_from_memory(address_to_read)
 
@@ -131,8 +131,8 @@ def parse_expression(expr):
     expr_content = expr[1:-1]
     if re.match("^[+-]*$", expr_content):
         binary_string = expr[1:-1]
-        binary_string = re.sub("\+", "1", binary_string)
-        binary_string = re.sub("\-", "0", binary_string)
+        binary_string = re.sub(r"\+", "1", binary_string)
+        binary_string = re.sub(r"\-", "0", binary_string)
 
         value = int(binary_string, base=2)
     else:
