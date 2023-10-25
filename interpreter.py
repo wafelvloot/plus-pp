@@ -160,6 +160,14 @@ def parse_code_line(line, line_index):
         logging.info(f"skipped line {line} for now (not implemented)")
 
 
+def run_code(code_lines):
+    for line_index, line in enumerate(code_lines):
+        try:
+            parse_code_line(line, line_index)
+        except CodeError as error:
+            end_on_error(error.message, line, line_index)
+
+
 def main():
     global memory
     memory = [0] * (2**16)
@@ -168,11 +176,7 @@ def main():
     code_lines = clean_input(code_lines)
     logging.debug(code_lines)
 
-    for line_index, line in enumerate(code_lines):
-        try:
-            parse_code_line(line, line_index)
-        except CodeError as error:
-            end_on_error(error.message, line, line_index)
+    run_code(code_lines)
 
     for i, val in enumerate(memory):
         if not val:
